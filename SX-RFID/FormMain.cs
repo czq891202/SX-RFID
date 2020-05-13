@@ -2,9 +2,11 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Configuration;
 using System.Data;
 using System.Drawing;
 using System.Drawing.Printing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -145,7 +147,11 @@ namespace SX_RFID
                 }
             }
         }
-
+        /// <summary>
+        /// 导入数据
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btn_import_Click(object sender, EventArgs e)
         {
             try
@@ -187,7 +193,11 @@ namespace SX_RFID
                 MessageBox.Show("错误信息:" + ex.Message);
             }
         }
-
+        /// <summary>
+        /// 保存配置
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btn_savesettings_Click(object sender, EventArgs e)
         {
             try
@@ -196,9 +206,27 @@ namespace SX_RFID
                 Properties.Settings.Default.packingperson = txt_packingperson.Text.Trim();
                 Properties.Settings.Default.Save();
                 MessageBox.Show("保存配置成功!", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }catch(Exception ex)
+            }catch
             {
                 MessageBox.Show("保存配置失败!", "错误消息", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+        /// <summary>
+        /// loading
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void FormMain_Load(object sender, EventArgs e)
+        {
+            string filepath = ConfigurationManager.AppSettings["db_FilePath"];
+            if (string.IsNullOrEmpty(filepath))
+            {
+                filepath = System.Windows.Forms.Application.StartupPath + "\\info.db";
+            }
+            if (!File.Exists(filepath))
+            {
+                string CommandText = "drop table if exists `t_box`;CREATE TABLE [t_box]([Id] NVARCHAR(50) PRIMARY KEY NOT NULL,[box_location] VARCHAR(500),[box_number] VARCHAR(18),[start_date] NVARCHAR(38),[end_date] NVARCHAR(38),[packingperson] NVARCHAR(50),[archive_type] NVARCHAR(50),[custodydate] INT,[archive_number] INT,[rfid_code] VARCHAR(18),[print_date] NVARCHAR(38));";
+                SQLiteHelper.ExecuteNonQuery(CommandText, null);
             }
         }
     }
